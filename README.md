@@ -93,6 +93,10 @@ Refer [here](https://github.com/actions/checkout/blob/v1/README.md) for previous
     # Default: 1
     fetch-depth: ''
 
+    # Whether to fetch tags, even if fetch-depth > 0.
+    # Default: false
+    fetch-tags: ''
+
     # Whether to download Git-LFS files
     # Default: false
     lfs: ''

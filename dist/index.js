@@ -5804,10 +5804,10 @@ class GitCommandManager {
             return output.exitCode === 0;
         });
     }
-    fetch(refSpec, fetchDepth) {
+    fetch(refSpec, fetchDepth, fetchTags) {
         return __awaiter(this, void 0, void 0, function* () {
             const args = ['-c', 'protocol.version=2', 'fetch'];
-            if (!refSpec.some(x => x === refHelper.tagsRefSpec)) {
+            if (!refSpec.some(x => x === refHelper.tagsRefSpec) && !fetchTags) {
                 args.push('--no-tags');
             }
             args.push('--prune', '--progress', '--no-recurse-submodules');
@@ -5885,8 +5885,8 @@ class GitCommandManager {
     }
     log1(format) {
         return __awaiter(this, void 0, void 0, function* () {
-            var args = format ? ['log', '-1', format] : ['log', '-1'];
-            var silent = format ? false : true;
+            const args = format ? ['log', '-1', format] : ['log', '-1'];
+            const silent = format ? false : true;
             const output = yield this.execGit(args, false, silent);
             return output.stdout;
         });
@@ -6226,7 +6226,7 @@ function getSource(settings) {
             }
             else {
                 const refSpec = refHelper.getRefSpec(settings.ref, settings.commit);
-                yield git.fetch(refSpec, settings.fetchDepth);
+                yield git.fetch(refSpec, settings.fetchDepth, settings.fetchTags);
             }
             core.endGroup();
             // Checkout info
@@ -14572,6 +14572,10 @@ function getInputs() {
         result.fetchDepth = 0;
     }
     core.debug(`fetch depth = ${result.fetchDepth}`);
+    // Fetch tags
+    result.fetchTags =
+        (core.getInput('fetch-tags') || 'false').toUpperCase() === 'TRUE';
+    core.debug(`fetch tags = ${result.fetchTags}`);
     // LFS
     result.lfs = (core.getInput('lfs') || 'false').toUpperCase() === 'TRUE';
     core.debug(`lfs = ${result.lfs}`);

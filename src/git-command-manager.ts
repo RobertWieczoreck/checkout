@@ -24,7 +24,11 @@ export interface IGitCommandManager {
     globalConfig?: boolean
   ): Promise<void>
   configExists(configKey: string, globalConfig?: boolean): Promise<boolean>
-  fetch(refSpec: string[], fetchDepth?: number): Promise<void>
+  fetch(
+    refSpec: string[],
+    fetchDepth?: number,
+    fetchTags?: boolean
+  ): Promise<void>
   getDefaultBranch(repositoryUrl: string): Promise<string>
   getWorkingDirectory(): string
   init(): Promise<void>
@@ -168,9 +172,14 @@ class GitCommandManager {
     return output.exitCode === 0
   }
 
-  async fetch(refSpec: string[], fetchDepth?: number): Promise<void> {
+  async fetch(
+    refSpec: string[],
+    fetchDepth?: number,
+    fetchTags?: boolean
+  ): Promise<void> {
     const args = ['-c', 'protocol.version=2', 'fetch']
-    if (!refSpec.some(x => x === refHelper.tagsRefSpec)) {
+
+    if (!refSpec.some(x => x === refHelper.tagsRefSpec) && !fetchTags) {
       args.push('--no-tags')
     }
 
@@ -255,8 +264,8 @@ class GitCommandManager {
   }
 
   async log1(format?: string): Promise<string> {
-    var args = format ? ['log', '-1', format] : ['log', '-1']
-    var silent = format ? false : true
+    const args = format ? ['log', '-1', format] : ['log', '-1']
+    const silent = format ? false : true
     const output = await this.execGit(args, false, silent)
     return output.stdout
   }
